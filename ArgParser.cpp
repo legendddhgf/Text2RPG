@@ -24,7 +24,7 @@ void ArgParser::usage2(string expectedstr) {
    exit(1);
 }
 
-// call to parse arguments and set internal opts and targets fields
+// call to parse arguments and set internal opts and fields
 void ArgParser::ArgParse(int argc, char **argv) {
    for (int i = 1; i < argc; i++) {
       if (argv[i][0] == '-') opts.push_back(argv[i] + 1); // add to opts
