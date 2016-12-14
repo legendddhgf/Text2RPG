@@ -16,7 +16,7 @@ OBJECTS   = ${CPPSRC:.cpp=.o}
 all : ${EXECBIN}
 
 ${EXECBIN} : ${OBJECTS}
-	${CPP} -o${EXECBIN} ${OBJECTS}
+	${CPP} -o ${EXECBIN} ${OBJECTS}
 
 %.o : %.cpp
 	${CPP} -c $<
