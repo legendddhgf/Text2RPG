@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
 using namespace std;
 
 #endif
