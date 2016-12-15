@@ -6,7 +6,7 @@
 
 CPP       = g++ -g -O0 -Wall -Wextra -std=gnu++14
 
-MODULES   = common ArgParser
+MODULES   = common ArgParser GameEngine
 
 HDRSRC    = ${MODULES:=.h}
 CPPSRC    = ${MODULES:=.cpp} main.cpp
