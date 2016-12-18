@@ -5,8 +5,8 @@
 
 typedef struct GameEngine {
 
-
-
+    vector <string> list_rooms;
+    vector <string> list_description;
 
     GameEngine(FILE *);
 
