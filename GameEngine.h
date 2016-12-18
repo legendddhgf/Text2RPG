@@ -8,7 +8,7 @@ typedef struct GameEngine {
 
 
 
-   GameEngine(FILE *);
+    GameEngine(FILE *);
 
 } GameEngine;
 
