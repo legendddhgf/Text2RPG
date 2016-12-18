@@ -4,7 +4,7 @@
 
 # $Id: Makefile,v 1.24 2016-10-23 00:40:40-07 - - $
 
-CPP       = g++ -g -O0 -Wall -Wextra -std=gnu++14
+CPP       = g++ -std=gnu++11 -g -O0 -Wall -Wextra
 
 MODULES   = common ArgParser GameEngine
 
