@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ArgParser.h"
+#include "GameEngine.h"
 
 int main (int argc, char **argv) {
 
@@ -13,7 +14,10 @@ int main (int argc, char **argv) {
       fprintf(stderr, "%s: File not found\n", infile.c_str());
       exit(1);
    }
+   GameEngine *game = new GameEngine(fp);
 
+   // end
+   delete game;
    delete parser;
    fclose(fp);
    return 0;
