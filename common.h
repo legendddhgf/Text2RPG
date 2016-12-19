@@ -10,4 +10,6 @@
 #include <algorithm>
 using namespace std;
 
+void stringTrim(char *, const char *, char *);
+
 #endif

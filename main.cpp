@@ -2,8 +2,9 @@
 #include "ArgParser.h"
 #include "GameEngine.h"
 
+// note that the std libs hold memory on exit so one block of still reachable
+// memory is expected
 int main (int argc, char **argv) {
-
     ArgParser *parser = new ArgParser();
     parser->SetExpected({string("infile"), string("config")});
     parser->ArgParse(argc, argv);

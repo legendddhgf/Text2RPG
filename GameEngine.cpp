@@ -3,17 +3,20 @@ GameEngine::GameEngine (FILE *fp) {
     list_rooms.clear(); // are these done automatically?
     list_description.clear();
 
-    char buf[1024];
+    char *buf = (char *) calloc(1024, sizeof(char));
+    char *modstr = (char *) calloc(1024, sizeof(char)); // modstr can be at most str size of buf + 1
     while (fgets(buf, 1023, fp)) {
-        if (buf[0] == '\n') continue; // skip empty lines
-        buf[strlen(buf) - 1] = '\0';
-        switch (buf[0]) {
+        stringTrim(buf, "\n\r ", modstr); // trim newline, carriage return, and space from front and back
+        if (strlen(modstr) == 0) { // skip empty lines
+            continue;
+        }
+        switch (modstr[0]) {
             case 'r': // room
                 if (list_rooms.size() != list_description.size()) { // one description per room required
                     fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                     exit(1);
                 }
-                list_rooms.push_back(string(buf + 2)); // skip the 'r' and the ' '
+                list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
                 break;
             case 'd': // description
                 if (list_rooms.size() == 0) {
@@ -21,19 +24,23 @@ GameEngine::GameEngine (FILE *fp) {
                     exit(1);
                 }
                 if (list_rooms.size() == list_description.size()) { // not first description segment
-                    string temp = list_description.back() + string("\t\t") + string(buf + 2) + string("\n");
+                    string temp = list_description.back() + string("\t\t") + string(modstr + 2) + string("\n");
                     list_description.pop_back();
                     list_description.push_back(temp);
                 }
                 else if (list_rooms.size() == list_description.size() + 1) {
-                    list_description.push_back(string("\t\t") + string(buf + 2) + string("\n")); // first description segment
+                    list_description.push_back(string("\t\t") + string(modstr + 2) + string("\n")); // first description segment
                 } else {
                     fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                     exit(1);
                 }
                 break;
+            case 'o':
+                break;
+            case 't':
+                break;
             default:
-                fprintf(stderr, "%c: No Corresponding field\n", buf[0]);
+                fprintf(stderr, "%c: No Corresponding field\n", modstr[0]);
                 exit(1);
                 break;
         }
@@ -48,4 +55,6 @@ GameEngine::GameEngine (FILE *fp) {
         fprintf(stdout, "%zd: %s\n", i + 1, room.c_str());
         fprintf(stdout, "%s", description.c_str());
     }
+    free(buf);
+    free(modstr);
 }
