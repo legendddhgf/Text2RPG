@@ -7,7 +7,8 @@ A text-based game generator
 * Stats
 * Fighting
 * Multiplayer?: Server Hosting vs Database Storing
-*     Issue: how do you verify that the other person is playing the same game; remember that this should be cross platform
+*     Issue: how do you verify that the other person is playing the same game; remember that this should be cross platform:
+*     Current solution: all games function as servers, must pick a unique ID if public, game clients will be provided to connect to servers
 
 ## Credits:
 * Isaak Cherdak - Lead Developer and Product Owner
