@@ -2,6 +2,8 @@
 GameEngine::GameEngine (FILE *fp) {
     list_rooms.clear(); // are these done automatically?
     list_description.clear();
+    map_opts.clear();
+    map_tags.clear();
 
     char *buf = (char *) calloc(1024, sizeof(char));
     char *modstr = (char *) calloc(1024, sizeof(char)); // modstr can be at most str size of buf + 1
@@ -16,6 +18,7 @@ GameEngine::GameEngine (FILE *fp) {
                     fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                     exit(1);
                 }
+                // TODO: check that all options have atleast one tag
                 list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
                 break;
             case 'd': // description
@@ -36,6 +39,11 @@ GameEngine::GameEngine (FILE *fp) {
                 }
                 break;
             case 'o':
+                // string for indexing into map is back of room list
+                //if (!inserted into opts) {
+                    //insert empty vector
+                //}
+                // append to the vector
                 break;
             case 't':
                 break;
@@ -49,6 +57,9 @@ GameEngine::GameEngine (FILE *fp) {
         fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
         exit(1);
     }
+    // TODO: check that all opts are in list rooms
+
+    // print rooms and descriptions
     for (size_t i = 0; i < list_rooms.size(); i++) {
         string room = list_rooms.at(i);
         string description = list_description.at(i);
