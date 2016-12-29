@@ -14,7 +14,7 @@ A text-based game generator
 * (
 *     r ROOM_NAME
 *     (d ROOM_DESC)+
-*     (g GROUP_NAME ?PRIORITY)*
+*     (g GROUP_NAME PRIORITY?)*
 *     (
 *         t (ROOM_NAME | GROUP NAME)
 *         o OPTION_DESC
