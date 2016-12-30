@@ -19,8 +19,8 @@ A text-based game generator
     (d $ROOM_DESC)+
     (g $GROUP_NAME ($PRIORITY)?)*
     (
-        t ($ROOM_NAME | $GROUP_NAME)
-        o $OPTION_DESC
+        o ($ROOM_NAME | $GROUP_NAME)
+        t $OPTION_DESC
     )*
 )*
 ```
