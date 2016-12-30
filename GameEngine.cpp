@@ -21,28 +21,46 @@ GameEngine::GameEngine (FILE *fp) {
         }
         switch (modstr[0]) {
             case 'r': // room
-                if (list_rooms.size() != list_description.size()) { // one description per room required
-                    fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
-                    exit(1);
+                {
+                    if (list_rooms.size() != list_description.size()) { // one description per room required
+                        fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
+                        exit(1);
+                    }
+                    if (map_opts.size() != map_tags.size()) {
+                        fprintf(stderr, "line %d: There must be one tag for every option\n", linecount);
+                        exit(1);
+                    }
+                    if (list_rooms.size() == 0) { // don't check tags if there are no rooms yet
+                        list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                        break;
+                    }
+                    auto opts_iter = map_opts.find(list_rooms.back());
+                    auto tags_iter = map_tags.find(list_rooms.back());
+                    if (opts_iter == map_opts.end() && tags_iter == map_tags.end()) { // no tags or opts, thus equal
+                        list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                        break;
+                    }
+                    if (opts_iter == map_opts.end() || // only opts has nothing
+                            tags_iter == map_tags.end() || // or only tags has nothing
+                            opts_iter->second.size() != tags_iter->second.size()) { // or for key: numopts != numtags
+                        fprintf(stderr, "line %d: There must be one tag for every option\n", linecount);
+                        exit(1);
+                    }
+                    list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                    break;
                 }
-                if (map_opts.size() != map_tags.size()) {
-                    fprintf(stderr, "line %d: There must be one tag for every option\n", linecount);
-                    exit(1);
-                }
-                list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
-                break;
             case 'd': // description
                 if (list_rooms.size() == 0) {
-                    fprintf(stderr, "Can't have a description without rooms\n");
+                    fprintf(stderr, "line %d: Can't have a description without rooms\n", linecount);
                     exit(1);
                 }
                 if (list_rooms.size() == list_description.size()) { // not first description segment
-                    string temp = list_description.back() + string("\t\t") + string(modstr + 2) + string("\n");
+                    string temp = list_description.back() + string("\t") + string(modstr + 2) + string("\n");
                     list_description.pop_back();
                     list_description.push_back(temp);
                 }
                 else if (list_rooms.size() == list_description.size() + 1) {
-                    list_description.push_back(string("\t\t") + string(modstr + 2) + string("\n")); // first description segment
+                    list_description.push_back(string("\t") + string(modstr + 2) + string("\n")); // first description segment
                 } else {
                     fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                     exit(1);
@@ -50,44 +68,52 @@ GameEngine::GameEngine (FILE *fp) {
                 break;
             case 'o':
                 {
-                if (list_rooms.size() == 0) {
-                    fprintf(stderr, "line %d: Must have at least one room to specify options\n", linecount);
-                    exit(1);
-                }
-                if (map_opts.size() != map_tags.size()) {
-                    fprintf(stderr, "line %d: Expected another tag first\n", linecount);
-                    exit(1);
-                }
-                // if there are no transitions from the current room, insert
-                // a blank one
-                if (map_opts.find(list_rooms.back()) == map_opts.end())
-                    map_opts.insert(pair<string, vector<string>>(list_rooms.back(), {}));
-                // finally, append to the appropriate vector
-                auto list_opts = map_opts.find(list_rooms.back())->second;
-                //list_opts.push_back(string(modstr + 2));
-                break;
+                    if (list_rooms.size() == 0) {
+                        fprintf(stderr, "line %d: Must have at least one room to specify options\n", linecount);
+                        exit(1);
+                    }
+                    if (map_opts.find(list_rooms.back()) != map_opts.end() &&
+                            map_tags.find(list_rooms.back()) != map_tags.end() &&
+                            map_opts.find(list_rooms.back())->second.size() !=
+                            map_tags.find(list_rooms.back())->second.size()) { // numopts should equal numtags at this point
+                        fprintf(stderr, "line %d: Expected another tag first\n", linecount);
+                        exit(1);
+                    }
+                    // if there are no transitions from the current room, insert
+                    // a blank one
+                    if (map_opts.find(list_rooms.back()) == map_opts.end()) {
+                        map_opts.insert(pair<string, vector<string>>(list_rooms.back(), {}));
+                    }
+                    // finally, append to the appropriate vector
+                    map_opts.find(list_rooms.back())->second.push_back(string(modstr + 2));
+                    break;
                 }
             case 't':
                 {
-                if (list_rooms.size() == 0) {
-                    fprintf(stderr, "line %d: Must have at least one room to specify tags\n", linecount);
-                    exit(1);
-                }
-                if (map_opts.size() == map_tags.size()) {
-                    fprintf(stderr, "line %d: Expected another option first\n", linecount);
-                    exit(1);
-                }
-                // if there are no transitions from the current room, insert
-                // a blank one
-                if (map_tags.find(list_rooms.back()) == map_tags.end())
-                    map_tags.insert(pair<string, vector<string>>(list_rooms.back(), {}));
-                // finally, append to the appropriate vector
-                auto list_tags = map_tags.find(list_rooms.back())->second;
-                //list_tags.push_back(string(modstr + 2));
-                break;
+                    if (list_rooms.size() == 0) {
+                        fprintf(stderr, "line %d: Must have at least one room to specify tags\n", linecount);
+                        exit(1);
+                    }
+                    if (map_opts.find(list_rooms.back()) == map_opts.end() || // can't have tags before opts
+                            (map_opts.find(list_rooms.back()) != map_opts.end() &&
+                             map_tags.find(list_rooms.back()) != map_tags.end() &&
+                             map_opts.find(list_rooms.back())->second.size() ==
+                             map_tags.find(list_rooms.back())->second.size())) { // numopts should equal numtags - 1 at this point
+                        fprintf(stderr, "line %d: Expected another option first\n", linecount);
+                        exit(1);
+                    }
+                    // if there are no transitions from the current room, insert
+                    // a blank one
+                    if (map_tags.find(list_rooms.back()) == map_tags.end())
+                        map_tags.insert(pair<string, vector<string>>(list_rooms.back(), {}));
+                    // finally, append to the appropriate vector
+                    map_tags.find(list_rooms.back())->second.push_back(string(modstr + 2));
+                    break;
                 }
             case 'g':
                 // TODO: PLZ
+                break;
+            case '#': // support those comments
                 break;
             default:
                 fprintf(stderr, "%c: No Corresponding field\n", modstr[0]);
@@ -99,14 +125,23 @@ GameEngine::GameEngine (FILE *fp) {
         fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
         exit(1);
     }
-    // TODO: check that all opts are in list rooms
+    // check that for all keys num opts = num tags and all opts are valid rooms
+    // (will have to add checking for groups later)
+    // TODO
 
-    // print rooms and descriptions
+    // print all info
     for (size_t i = 0; i < list_rooms.size(); i++) {
         string room = list_rooms.at(i);
         string description = list_description.at(i);
         fprintf(stdout, "%zd: %s\n", i + 1, room.c_str());
-        fprintf(stdout, "%s", description.c_str());
+        fprintf(stdout, "%s", description.c_str()); // assumes description was modified in a certain way first
+        if (map_opts.find(room) == map_opts.end()) continue; // if no opts/tags
+        auto list_opts = map_opts.at(room);
+        auto list_tags = map_tags.at(room);
+        for (size_t k = 0; k < list_opts.size(); k++) { // since numopts = numtags
+            printf("\t\tOption: %s\n", list_opts.at(k).c_str());
+            printf("\t\t\tTag: %s\n", list_tags.at(k).c_str());
+        }
     }
     free(buf);
     free(modstr);
