@@ -1,7 +1,7 @@
 # Text2RPG
 A text-based game generator
 
-[![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/legendddhgf_Text2RPG/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Gitter](https://badges.gitter.im/legendddhgf_Text2RPG/Lobby.svg)](https://gitter.im/legendddhgf_Text2RPG/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Potential Ideas:
 * Read in text files describing details of games in special format
@@ -13,21 +13,30 @@ A text-based game generator
   * Current solution: all games function as servers, must pick a unique ID if public, game clients will be provided to connect to servers
 
 ### File Format (in regular language form):
-```
-(
+```sh
+( # Group declaration
+    g $GROUP_NAME
+    (m $GROUP_NAME ($PRIORITY)?)* # groups can be members (subgroups) of other groups
+    ( # Group global transitions
+        o ($ROOM_NAME | $GROUP_NAME)
+        t $OPTION_DESC
+    )*
+)*
+( # Room declaration
     r $ROOM_NAME
     (d $ROOM_DESC)+
-    (g $GROUP_NAME ($PRIORITY)?)*
+    (m $GROUP_NAME ($PRIORITY)?)* # member tag declares this room to be member of group $GROUP_NAME
     (
         o ($ROOM_NAME | $GROUP_NAME)
         t $OPTION_DESC
     )*
 )*
 ```
+Note that the indentation and parenthesis are there to help with the visualization, and would not appear in actual file.
 
 ## Credits:
 * Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
-* August Valera (@4U6U57)- Developer
+* August Valera (@4U6U57) - Developer
 
 ### OTHERS
 * Nathan Whitehead (@nwhitehead) - Designed class assignment for UCSC's CMPS 12B that inspired this project
