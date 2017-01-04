@@ -1,7 +1,9 @@
 #include "common.h"
 
 // trims from beginning and end of s, all characters in trim and copies it
-// to ret
+// to ret.
+// This was designed with the intention of avoiding reassignment of pointers
+// to manually allocated blocks.
 void stringTrim (char *s, const char *trim, char *ret) {
     size_t i = 0;
     // first pass skips front
