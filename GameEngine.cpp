@@ -1,14 +1,19 @@
 #include "GameEngine.h"
 
+#define NOPARSEMODE 0
+#define ROOMPARSEMODE 1
+#define GROUPPARSEMODE 2
+
 GameEngine::GameEngine (FILE *fp) {
     list_rooms.clear(); // are these done automatically?
     list_description.clear();
     map_opts.clear();
     map_tags.clear();
 
+    int parseMode = NOPARSEMODE;
     char *buf = (char *) calloc(1024, sizeof(char)); // this is simply a temporary string which gets trimmed to modstr
     char *modstr = (char *) calloc(1024, sizeof(char)); // THIS IS THE LINE WE ARE READING!!!
-    int linecount = 0;
+    int linecount = 0; // helps the user debug their text file
     while (fgets(buf, 1023, fp)) {
         linecount++;
         stringTrim(buf, "\n\r ", modstr); // trim newline, carriage return, and space from front and back
@@ -51,6 +56,7 @@ GameEngine::GameEngine (FILE *fp) {
                         exit(1);
                     }
                     list_rooms.push_back(string(modstr));
+                    parseMode = ROOMPARSEMODE;
                     break;
                 }
             case 'd': // description
