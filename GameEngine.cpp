@@ -19,7 +19,11 @@ GameEngine::GameEngine (FILE *fp) {
             fprintf(stderr, "line %d: No parameters specified\n", linecount);
             exit(1);
         }
-        switch (modstr[0]) {
+        char tag = modstr[0]; // in this case, by tag we mean the character of the line (IE: 'r', 'd', 'g', etc.)
+        strncpy(buf, modstr, strlen(modstr) + 1); // this line and the following one trim everything from
+        stringTrim(buf + 1, "\n\r ", modstr);     // the tag to the beginning of the parameter
+                                                  // (room for 'r', description for 'd', etc)
+        switch (tag) { // REMEMBER: at this point modstr only contains the parameter, tag contains the current tag
             case 'r': // room
                 {
                     if (list_rooms.size() != list_description.size()) { // one description per room required
@@ -31,13 +35,13 @@ GameEngine::GameEngine (FILE *fp) {
                         exit(1);
                     }
                     if (list_rooms.size() == 0) { // don't check tags if there are no rooms yet
-                        list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                        list_rooms.push_back(string(modstr));
                         break;
                     }
                     auto opts_iter = map_opts.find(list_rooms.back());
                     auto tags_iter = map_tags.find(list_rooms.back());
                     if (opts_iter == map_opts.end() && tags_iter == map_tags.end()) { // no tags or opts, thus equal
-                        list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                        list_rooms.push_back(string(modstr));
                         break;
                     }
                     if (opts_iter == map_opts.end() || // only opts has nothing
@@ -46,7 +50,7 @@ GameEngine::GameEngine (FILE *fp) {
                         fprintf(stderr, "line %d: There must be one tag for every option\n", linecount);
                         exit(1);
                     }
-                    list_rooms.push_back(string(modstr + 2)); // skip the 'r' and the ' '
+                    list_rooms.push_back(string(modstr));
                     break;
                 }
             case 'd': // description
@@ -55,12 +59,12 @@ GameEngine::GameEngine (FILE *fp) {
                     exit(1);
                 }
                 if (list_rooms.size() == list_description.size()) { // not first description segment
-                    string temp = list_description.back() + string("\t") + string(modstr + 2) + string("\n");
+                    string temp = list_description.back() + string("\t") + string(modstr) + string("\n");
                     list_description.pop_back();
                     list_description.push_back(temp);
                 }
                 else if (list_rooms.size() == list_description.size() + 1) {
-                    list_description.push_back(string("\t") + string(modstr + 2) + string("\n")); // first description segment
+                    list_description.push_back(string("\t") + string(modstr) + string("\n")); // first description segment
                 } else {
                     fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                     exit(1);
@@ -85,7 +89,7 @@ GameEngine::GameEngine (FILE *fp) {
                         map_opts.insert(pair<string, vector<string>>(list_rooms.back(), {}));
                     }
                     // finally, append to the appropriate vector
-                    map_opts.find(list_rooms.back())->second.push_back(string(modstr + 2));
+                    map_opts.find(list_rooms.back())->second.push_back(string(modstr));
                     break;
                 }
             case 't':
@@ -107,7 +111,7 @@ GameEngine::GameEngine (FILE *fp) {
                     if (map_tags.find(list_rooms.back()) == map_tags.end())
                         map_tags.insert(pair<string, vector<string>>(list_rooms.back(), {}));
                     // finally, append to the appropriate vector
-                    map_tags.find(list_rooms.back())->second.push_back(string(modstr + 2));
+                    map_tags.find(list_rooms.back())->second.push_back(string(modstr));
                     break;
                 }
             case 'g':
