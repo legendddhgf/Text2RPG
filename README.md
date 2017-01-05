@@ -15,24 +15,29 @@ A text-based game generator
 ### File Format (in regular language form):
 ```sh
 (
-    (   # Group declaration
-        g $GROUP_NAME
+    (   # Room declaration
+        r $ROOM_NAME
+        (d $ROOM_DESC)+
         (
-            (m ($ROOM_NAME | $ROOM_REGEX) ($PRIORITY)?)   # Declares room(s) to be members of this group
-        |   (s ($GROUP_NAME | $GROUP_REGEX) ($PRIORITY)?) # Declares group(s) to be subgroups of this group
-        |   (   # Group global transitions, applied to each member room
-                o ($ROOM_NAME | $GROUP_NAME)
+            (m ($ROOM_REGEX) ($PRIORITY)?) # Declares given room(s) to be children of this room with optional priority
+                                           # If a room has children, it is not "visitable", and entry will redirect the player to a 
+                                           # randomly selected child weighted by priority immediately after printing the description
+        |   (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?) # Declares an expected item to be prerequesite to enter the room
+                                                           # Optionally requires a specific quantity greater/less than or equal to value
+                                                           # If not provided, defaults to > 0 (user has item)
+        |   (a $ITEM_NAME (+ | - | =) $VALUE)              # Declares an action to inc/dec/set given item's quantity to value upon entry
+        |   (   # Transitions are applied to each child room if there are children
+                o $ROOM_NAME
                 t $OPTION_DESC
+                (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?)* # Declares expected item to be prerequesite to perform said transition
+                (a $ITEM_NAME (+ | - | =) $VALUE)*              # Declares action to inc/dec/set item's quantity to value on selection
             )
         )*
     )
-|   (   # Room declaration
-        r $ROOM_NAME
-        (d $ROOM_DESC)+
-        (   # Room local transitions
-            o ($ROOM_NAME | $GROUP_NAME)
-            t $OPTION_DESC
-        )*
+|   (   # Item declaration
+        i $ITEM_NAME
+        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )* # Defines max/min/initial quantity, defaulting to infinity/0/0
+        (d $ITEM_DESC)+
     )
 )*
 ```
