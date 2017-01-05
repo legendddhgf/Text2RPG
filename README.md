@@ -19,7 +19,7 @@ A text-based game generator
         r $ROOM_NAME
         (d $ROOM_DESC)+
         (
-            (m ($ROOM_NAME | $ROOM_REGEX) ($PRIORITY)?)   # Declares given room(s) to be children of this room with optional priority
+            (m ($ROOM_REGEX) ($PRIORITY)?)                # Declares given room(s) to be children of this room with optional priority
                                                           # If a room has children, it is not "visitable", and entry will immediately
                                                           # redirect the player randomly to one of it's children weighted by priority
         |   (e $ITEMNAME ((> | >= | < | <= | =) $VALUE)?) # Declares an expected item to be prerequesite to enter the room
