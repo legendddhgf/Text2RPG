@@ -1,8 +1,8 @@
 #include "GameEngine.h"
 
-#define NOPARSEMODE 0
-#define ROOMPARSEMODE 1
-#define GROUPPARSEMODE 2
+#define PARSEMODENONE 0
+#define PARSEMODEROOM 1
+#define PARSEMODEGROUP 2
 
 GameEngine::GameEngine (FILE *fp) {
     list_rooms.clear(); // are these done automatically?
@@ -10,8 +10,8 @@ GameEngine::GameEngine (FILE *fp) {
     map_room_opts.clear();
     map_room_tags.clear();
 
-    int parseMode = NOPARSEMODE;
-    string lastGroup = string(""); // when parseMode == GROUPPARSEMODE, this is the key into the group maps
+    int parseMode = PARSEMODENONE;
+    string lastGroup = string(""); // when parseMode == PARSEMODEGROUP, this is the key into the group maps
     char *buf = (char *) calloc(1024, sizeof(char)); // this is simply a temporary string which gets trimmed to modstr
     char *modstr = (char *) calloc(1024, sizeof(char)); // THIS IS THE LINE WE ARE READING!!!
     int linecount = 0; // helps the user debug their text file
@@ -32,7 +32,7 @@ GameEngine::GameEngine (FILE *fp) {
         switch (tag) { // REMEMBER: at this point modstr only contains the parameter, tag contains the current tag
             case 'r': // room
                 {
-                    parseMode = ROOMPARSEMODE;
+                    parseMode = PARSEMODEROOM;
                     if (list_rooms.size() != list_room_descriptions.size()) { // one description per room required
                         fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                         exit(1);
@@ -65,7 +65,7 @@ GameEngine::GameEngine (FILE *fp) {
                 // functionality of having multiple descriptions is implemented
                 // by appending to the previous description string for a given
                 // room if it already exists
-                if (parseMode != ROOMPARSEMODE) {
+                if (parseMode != PARSEMODEROOM) {
                     fprintf(stderr, "line %d: Cannot provide descriptions unless parsing for rooms\n", linecount);
                     exit(1);
                 }
@@ -87,11 +87,11 @@ GameEngine::GameEngine (FILE *fp) {
                 break;
             case 'o':
                 {
-                    if (parseMode == NOPARSEMODE) {
+                    if (parseMode == PARSEMODENONE) {
                         fprintf(stderr, "line %d: Can't specify options without rooms or groups\n", linecount);
                         exit(1);
                     }
-                    if (parseMode == ROOMPARSEMODE) {
+                    if (parseMode == PARSEMODEROOM) {
                         if (list_rooms.size() == 0) {
                             fprintf(stderr, "line %d: Must have at least one room to specify options\n", linecount);
                             exit(1);
@@ -111,17 +111,17 @@ GameEngine::GameEngine (FILE *fp) {
                         // finally, append to the appropriate vector
                         map_room_opts.find(list_rooms.back())->second.push_back(string(modstr));
                         break;
-                    } else if (parseMode == GROUPPARSEMODE) {
+                    } else if (parseMode == PARSEMODEGROUP) {
                         // TODO: dat functionality
                     }
                 }
             case 't':
                 {
-                    if (parseMode == NOPARSEMODE) {
+                    if (parseMode == PARSEMODENONE) {
                         fprintf(stderr, "line %d: Can't specify tags without rooms or groups\n", linecount);
                         exit(1);
                     }
-                    if (parseMode == ROOMPARSEMODE) {
+                    if (parseMode == PARSEMODEROOM) {
                         if (list_rooms.size() == 0) {
                             fprintf(stderr, "line %d: Must have at least one room to specify tags\n", linecount);
                             exit(1);
@@ -141,7 +141,7 @@ GameEngine::GameEngine (FILE *fp) {
                         // finally, append to the appropriate vector
                         map_room_tags.find(list_rooms.back())->second.push_back(string(modstr));
                         break;
-                    } else if (parseMode ==  GROUPPARSEMODE) {
+                    } else if (parseMode == PARSEMODEGROUP) {
                         // TODO: dat functionality
                     }
                 }
