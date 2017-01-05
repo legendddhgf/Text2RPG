@@ -26,8 +26,8 @@ A text-based game generator
                                                            # Optionally requires a specific quantity greater/less than or equal to value
                                                            # If not provided, defaults to > 0 (user has item)
         |   (a $ITEM_NAME (+ | - | =) $VALUE)              # Declares an action to inc/dec/set given item's quantity to value upon entry
-        |   (   # Group global transitions, applied to each member room
-                o $GROUP_NAME
+        |   (   # Transitions are applied to each child room if there are children
+                o $ROOM_NAME
                 t $OPTION_DESC
                 (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?)* # Declares expected item to be prerequesite to perform said transition
                 (a $ITEM_NAME (+ | - | =) $VALUE)*              # Declares action to inc/dec/set item's quantity to value on selection
@@ -36,7 +36,7 @@ A text-based game generator
     )
 |   (   # Item declaration
         i $ITEM_NAME
-        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))* )* # Defines max/min/initial quantity, defaulting to infinity/0/0
+        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )* # Defines max/min/initial quantity, defaulting to infinity/0/0
         (d $ITEM_DESC)+
     )
 )*
