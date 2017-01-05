@@ -19,18 +19,18 @@ A text-based game generator
         r $ROOM_NAME
         (d $ROOM_DESC)+
         (
-            (m ($ROOM_NAME | $ROOM_REGEX) ($PRIORITY)?)  # Declares given room(s) to be children of this room with optional priority
-                                                         # If a room has children, it is not "visitable", and entry will immediately
-                                                         # redirect the player randomly to one of it's children weighted by priority
-        |   (e $ITEMNAME ((> | < | =) $VALUE)?)          # Declares an expected item to be prerequesite to enter the room
-                                                         # Optionally requires a specific quantity greater/less than or equal to value
-                                                         # If not provided, defaults to > 0 (user has item)
-        |   (a $ITEM_NAME (+ | - | =) $VALUE)            # Declares an action to inc/dec/set given item's quantity to value upon entry
+            (m ($ROOM_NAME | $ROOM_REGEX) ($PRIORITY)?)   # Declares given room(s) to be children of this room with optional priority
+                                                          # If a room has children, it is not "visitable", and entry will immediately
+                                                          # redirect the player randomly to one of it's children weighted by priority
+        |   (e $ITEMNAME ((> | >= | < | <= | =) $VALUE)?) # Declares an expected item to be prerequesite to enter the room
+                                                          # Optionally requires a specific quantity greater/less than or equal to value
+                                                          # If not provided, defaults to > 0 (user has item)
+        |   (a $ITEM_NAME (+ | - | =) $VALUE)             # Declares an action to inc/dec/set given item's quantity to value upon entry
         |   (   # Group global transitions, applied to each member room
                 o $GROUP_NAME
                 t $OPTION_DESC
-                (e $ITEMNAME ((> | < | =) $VALUE)?)*     # Declares an expected item to be prerequesite to perform said transition
-                (a $ITEM_NAME (+ | - | =) $VALUE)*       # Declares an action to inc/dec/set item's quantity to value when selected
+                (e $ITEMNAME ((> | >= | < | <= | =) $VALUE)?)* # Declares an expected item to be prerequesite to perform said transition
+                (a $ITEM_NAME (+ | - | =) $VALUE)*             # Declares an action to inc/dec/set item's quantity to value on selection
             )
         )*
     )
