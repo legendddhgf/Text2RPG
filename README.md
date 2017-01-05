@@ -20,19 +20,33 @@ A text-based game generator
         (
             (m ($ROOM_NAME | $ROOM_REGEX) ($PRIORITY)?)   # Declares room(s) to be members of this group
         |   (s ($GROUP_NAME | $GROUP_REGEX) ($PRIORITY)?) # Declares group(s) to be subgroups of this group
+        |   (e $ITEMNAME ((> | < | =) $VALUE)?)*          # Declares an expected item to be able to enter the room
+                                                          # Optionally requires a specific quantity greater/less than or equal to value
+                                                          # If not provided, defaults to > 0 (user has item)
+        |   (a $ITEM_NAME (+ | - | =) $VALUE)*            # Declares an action to inc/dec/set given item's quantity to value upon entry
         |   (   # Group global transitions, applied to each member room
                 o ($ROOM_NAME | $GROUP_NAME)
                 t $OPTION_DESC
+                (e $ITEMNAME ((> | < | =) $VALUE)?)*      # Declares an expected item to be able to perform said transition
+                (a $ITEM_NAME (+ | - | =) $VALUE)*        # Declares an action to inc/dec/set given item's quantity to value upon selection
             )
         )*
     )
 |   (   # Room declaration
         r $ROOM_NAME
         (d $ROOM_DESC)+
+        (e $ITEMNAME ((> | < | =) $VALUE)?)*
+        (a $ITEM_NAME (+ | - | =) $VALUE)*
         (   # Room local transitions
             o ($ROOM_NAME | $GROUP_NAME)
             t $OPTION_DESC
+            (e $ITEMNAME ((> | < | =) $VALUE)?)*
+            (a $ITEM_NAME (+ | - | =) $VALUE)*
         )*
+    )
+|   (   # Item declaration
+        r $ITEM_NAME
+        (d $ITEM_DESC)*
     )
 )*
 ```
