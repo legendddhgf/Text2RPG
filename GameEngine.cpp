@@ -31,6 +31,7 @@ GameEngine::GameEngine (FILE *fp) {
         switch (tag) { // REMEMBER: at this point modstr only contains the parameter, tag contains the current tag
             case 'r': // room
                 {
+                    parseMode = ROOMPARSEMODE;
                     if (list_rooms.size() != list_description.size()) { // one description per room required
                         fprintf(stderr, "%s: Room has no description\n", list_rooms.back().c_str());
                         exit(1);
@@ -56,10 +57,13 @@ GameEngine::GameEngine (FILE *fp) {
                         exit(1);
                     }
                     list_rooms.push_back(string(modstr));
-                    parseMode = ROOMPARSEMODE;
                     break;
                 }
             case 'd': // description
+                if (parseMode != ROOMPARSEMODE) {
+                    fprintf(stderr, "line %d: Cannot provide descriptions unless parsing for rooms\n", linecount);
+                    exit(1);
+                }
                 if (list_rooms.size() == 0) {
                     fprintf(stderr, "line %d: Can't have a description without rooms\n", linecount);
                     exit(1);
