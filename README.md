@@ -35,7 +35,7 @@ A text-based game generator
         )*
     )
 |   (   # Item declaration
-        r $ITEM_NAME
+        i $ITEM_NAME
         (d $ITEM_DESC)*
     )
 )*
