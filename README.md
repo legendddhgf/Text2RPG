@@ -9,47 +9,101 @@ A text-based game generator
 - Stats
 - Fighting
 - Multiplayer?: Server Hosting vs Database Storing
-  - Issue: how do you verify that the other person is playing the same game; remember that this should be cross platform:
-  - Current solution: all games function as servers, must pick a unique ID if public, game clients will be provided to connect to servers
+    - Issue: how do you verify that the other person is playing the same game; 
+        remember that this should be cross platform:
+    - Current solution: all games function as servers, must pick a unique ID if 
+        public, game clients will be provided to connect to servers
 
-### File Format (in regular language form):
+### File Format:
+
+Below is the specification of the game file language, in a regular language like
+format. Note that the indentation and parenthesis are not part of the language,
+they are only there to help with visualization and should not appear in the
+actual file. Immediately after the specification is a set of descriptions to
+accompany it.
+
 ```sh
 (
     (   # Room declaration
         r $ROOM_NAME
         (d $ROOM_DESC)+
         (
-            (m ($ROOM_REGEX) ($PRIORITY)?) # Declares given room(s) to be children of this room with optional priority
-                                           # If a room has children, it is not "visitable", and entry will redirect the player to a 
-                                           # randomly selected child weighted by priority immediately after printing the description
-        |   (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?) # Declares an expected item to be prerequesite to enter the room
-                                                           # Optionally requires a specific quantity greater/less than or equal to value
-                                                           # If not provided, defaults to > 0 (user has item)
-        |   (a $ITEM_NAME (+ | - | =) $VALUE)              # Declares an action to inc/dec/set given item's quantity to value upon entry
-        |   (   # Transitions are applied to each child room if there are children
+            (m ($ROOM_REGEX) ($PRIORITY)?) 
+        |   (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?) 
+        |   (a $ITEM_NAME (+ | - | =) $VALUE)
+        |   (   
                 o $ROOM_NAME
                 t $OPTION_DESC
-                (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?)* # Declares expected item to be prerequesite to perform said transition
-                (a $ITEM_NAME (+ | - | =) $VALUE)*              # Declares action to inc/dec/set item's quantity to value on selection
+                (e $ITEM_NAME ((> | >= | < | <= | =) $VALUE)?)*
+                (a $ITEM_NAME (+ | - | =) $VALUE)* 
             )
         )*
     )
 |   (   # Item declaration
         i $ITEM_NAME
-        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )* # Defines max/min/initial quantity, defaulting to infinity/0/0
+        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )*
         (d $ITEM_DESC)+
     )
 )*
 ```
 
-- The indentation and parenthesis are there to help with the visualization, and should not appear in actual file.
-- `$ROOM_REGEX` and `$GROUP_REGEX` refer to regular expressions that match multiple `$ROOM_NAME`'s or `$GROUP_NAME`'s.
-- Referencing a `$GROUP_NAME` in `o` randomly selects a member of that group with weighted `$PRIORITY`.
+The following are parts of the original specification of **@nwhitehead**,
+unmodified:
+
+- `r` declares a room with a given unique name
+- `d` provides an (optionally multi-line) description of the room given by the
+    last `r`
+- `o` defines a transition from the room given by the last `r` to the given room
+- `t` provides a one line description for the transition given by the last `o`
+
+Here are the modifications (actually additions) we have made to the language:
+
+- `m` declares the given room(s) to be a children of the room given by the last 
+    `r`, with a given optional priority
+    - The `$ROOM_REGEX` is a regular expression that can match one or more
+        rooms. All rooms matched are given the same priority. If the room is
+        already explicitly defined as a child, it is ignored by the regex.
+    - The priority of the given matching children, if not provided, defaults to 
+        **(???)**
+    - A room with children is not "visitable", and conceptually can be thought
+        of as a "group". The behavior of a transition to a group differs from
+        that of a room.
+    - A transition to a group will first print out the group's `d` as usual, and
+        have the group's `e` and `a` tags function as normal.
+    - However, immediately following that, the player will be immediately and
+        silently (without user intervention) transitioned to a randomly selected
+        child of the group, weighted by priority
+    - Transitions of the group will be appended to the transitions of the chosen
+        room, overwriting any existing transitions with the same destination
+- `e` defines an entry condition that must be satisfied in order to take the
+    transition given by the last `o`, or alternatively enter the room given by
+    the last `r`
+    - Multiple `e` tags defined for the same entity are logically `&&`'ed (must
+        all be met)
+    - This condition is defined by the quantity of the given item the player
+        has, resolving to `TRUE` if the player has less than/less than or
+        equal/greater than/greater than or equal/exactly equal the given value
+        of the item with the operator >/>=/</<=/=
+    - If no operator and value is given, the defaults are `> 0` (the player is
+        in possession of the item in any quantity)
+- `a` defines an action to be performed upon taking the transition given by the
+    last `o`, or alternatively upon entering the room given by the last `r`
+    - This action is defined by modifying the quantity the player has of the
+        given item, specifically incrementing/decrementing/setting the player's
+        quantity by the given value
+- `i` declares an item with the given unique name
+- `d` is modified to provide an (optionally multi-line) description of the room
+    room given by the last `r`, or alternatively the item given by the last `i`.
+- `m` defines quantity conditions for the item given by the last `i`
+    - These conditions set the minimum/maximum/initial value on the player's
+        inventory for this item with the operator +/-/=, overwriting the default
+        values of 1/0/0
 
 ## Credits:
-* Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
-* August Valera (@4U6U57) - Developer
+- Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
+- August Valera (@4U6U57) - Developer
 
 ### OTHERS
-* Nathan Whitehead (@nwhitehead) - Designed class assignment for UCSC's CMPS 12B that inspired this project
-* http://stackoverflow.com/questions/410980/include-a-text-file-in-a-c-program-as-a-char - compile game instead of game engine
+- Nathan Whitehead (@nwhitehead) - Designed class assignment for UCSC's CMPS 12B
+    that inspired this project
+- http://stackoverflow.com/questions/410980/include-a-text-file-in-a-c-program-as-a-char - compile game instead of game engine
