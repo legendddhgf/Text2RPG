@@ -2,7 +2,12 @@
 
 #define PARSEMODENONE 0
 #define PARSEMODEROOM 1
-#define PARSEMODEITEM 2
+#define PARSEMODEROOMOPTION 2 // unfortunate development right here
+#define PARSEMODEITEM 3
+
+#define PRIORITYDEFAULT 100
+
+
 
 GameEngine::GameEngine (FILE *fp) {
   map_room_descriptions.clear(); // are these done automatically?
@@ -21,6 +26,10 @@ GameEngine::GameEngine (FILE *fp) {
   int linecount = 0; // helps the user debug their text file
   while (fgets(buf, 1023, fp)) {
     linecount++;
+    if (strlen(modstr) >= 1000) {
+      fprintf(stderr, "line %d: Too long\n", linecount);
+      exit(1);
+    }
     stringTrim(buf, "\n\r ", modstr); // trim newline, carriage return,
     // and space from front and back
     if (strlen(modstr) == 0) { // skip empty lines
@@ -148,10 +157,10 @@ GameEngine::GameEngine (FILE *fp) {
             }
             // finally, append to the appropriate vector
             map_room_opts.find(lastKey)->second.push_back(string(modstr));
-            break;
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
           }
+          break;
         }
       case 't':
         {
@@ -178,11 +187,48 @@ GameEngine::GameEngine (FILE *fp) {
               map_room_tags.insert(pair<string, vector<string>>(lastKey, {}));
             // finally, append to the appropriate vector
             map_room_tags.find(lastKey)->second.push_back(string(modstr));
-            break;
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
           }
+          break;
         }
+      case 'm':
+        if (parseMode == PARSEMODENONE) {
+          fprintf(stderr, "line %d: 'm' is an invalid tag %s",
+              linecount, "when not parsing for anything\n");
+          exit(1);
+        }
+        if (parseMode == PARSEMODEROOM) {
+          // Cannot have a room be a member of itself
+          // TODO: compare to first parameter only
+          if (string(modstr).compare(lastKey) == 0) {
+            fprintf(stderr, "line %d: %s cannot be a member of itself\n",
+                linecount, modstr);
+            exit(1);
+          }
+          if (map_room_contents.find(lastKey) == map_room_contents.end()) {
+            // sometimes life isn't simple but it could be
+            map_room_contents.insert(pair<string,
+                vector<tuple<string, string>>>(lastKey, {}));
+          }
+          if (true) { // TODO: if one parameter
+            map_room_contents.find(lastKey)->second.emplace_back(
+                string(modstr), to_string(PRIORITYDEFAULT));
+          } else {
+            // TODO: confirm param 2 is an int before inserting
+          } // TODO: check for wrong num of params at beginning of 'm'
+        } else if (parseMode == PARSEMODEITEM) {
+          // TODO PLZ
+          // TODO would really help to have a function that makes the
+          //      string into a vector of paramaters
+        }
+        break;
+      case 'e':
+        // TODO
+        break;
+      case 'a':
+        // TODO
+        break;
       case 'i':
         // TODO: items PLZ
         // TODO: create a function that checks if it is ok to
@@ -206,29 +252,46 @@ fprintf(stderr, "%s: Room has no description\n",
 list_rooms.back().c_str());
 exit(1); }
 */
+  // TODO resolve regex
+  // TODO:
   // check that for all keys num opts = num tags and all opts are valid rooms
   // (will have to add checking for non-visitable rooms later)
-  // TODO
 
   // print all info
   auto iter_room = map_room_descriptions.begin();
   int count_rooms = 1;
+  fprintf(stdout, "ROOMS:\n=====\n");
   while (iter_room != map_room_descriptions.end()) {
     string room = iter_room->first;
     string description = iter_room->second;
+    iter_room++;
     fprintf(stdout, "%d: %s\n", count_rooms++, room.c_str());
     // assumes description was modified in a certain way first
     fprintf(stdout, "%s", description.c_str());
-    iter_room++;
+    if (map_room_contents.find(room) != map_room_contents.end()) {
+      fprintf(stdout, "\tHas Members:\n");
+      auto list_contents = map_room_contents.find(room)->second;
+      for (size_t k = 0; k < list_contents.size(); k++) {
+        fprintf(stdout, "\t\t%s: Priority=%s\n",
+            get<0>(list_contents.at(k)).c_str(),
+            get<1>(list_contents.at(k)).c_str());
+      }
+    }
     // if no opts/tags
     if (map_room_opts.find(room) == map_room_opts.end()) continue;
+    fprintf(stdout, "\tHas Options and Tags:\n");
     auto list_opts = map_room_opts.at(room);
     auto list_tags = map_room_tags.at(room);
     for (size_t k = 0; k < list_opts.size(); k++) { // since numopts = numtags
-      printf("\t\tOption: %s\n", list_opts.at(k).c_str());
-      printf("\t\t\tTag: %s\n", list_tags.at(k).c_str());
+      fprintf(stdout, "\t\tOption: %s\n", list_opts.at(k).c_str());
+      fprintf(stdout, "\t\t\tTag: %s\n", list_tags.at(k).c_str());
     }
   }
+  fprintf(stdout, "=====\nITEMS:\n=====\n");
+  while(false) { // this is where you would print out items
+
+  }
+  fprintf(stdout, "=====\n");
   free(buf);
   free(modstr);
 }
