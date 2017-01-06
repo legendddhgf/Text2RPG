@@ -1,9 +1,11 @@
 # Text2RPG
+
 A text-based game generator
 
 [![Gitter](https://badges.gitter.im/legendddhgf_Text2RPG/Lobby.svg)](https://gitter.im/legendddhgf_Text2RPG/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Potential Ideas:
+
 - Read in text files describing details of games in special format
 - Random Room Path Generation
 - Stats
@@ -41,7 +43,7 @@ accompany it.
     )
 |   (   # Item declaration
         i $ITEM_NAME
-        (m ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )*
+        (q ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )*
         (d $ITEM_DESC)+
     )
 )*
@@ -64,7 +66,7 @@ Here are the modifications (actually additions) we have made to the language:
         rooms. All rooms matched are given the same priority. If the room is
         already explicitly defined as a child, it is ignored by the regex.
     - The priority of the given matching children, if not provided, defaults to 
-        **(???)**
+        100
     - A room with children is not "visitable", and conceptually can be thought
         of as a "group". The behavior of a transition to a group differs from
         that of a room.
@@ -74,7 +76,8 @@ Here are the modifications (actually additions) we have made to the language:
         silently (without user intervention) transitioned to a randomly selected
         child of the group, weighted by priority
     - Transitions of the group will be appended to the transitions of the chosen
-        room, overwriting any existing transitions with the same destination
+        room, except for transitions that would conflict in destination with a
+        transition already defined
 - `e` defines an entry condition that must be satisfied in order to take the
     transition given by the last `o`, or alternatively enter the room given by
     the last `r`
@@ -84,8 +87,9 @@ Here are the modifications (actually additions) we have made to the language:
         has, resolving to `TRUE` if the player has less than/less than or
         equal/greater than/greater than or equal/exactly equal the given value
         of the item with the operator >/>=/</<=/=
-    - If no operator and value is given, the defaults are `> 0` (the player is
-        in possession of the item in any quantity)
+    - If an entry condition is given with an item argument but no operator and 
+        value, the comparison defaults to `> $ITEM_MIN` (checks if the player has 
+        any amount of the item greater than the minimum amount).
 - `a` defines an action to be performed upon taking the transition given by the
     last `o`, or alternatively upon entering the room given by the last `r`
     - This action is defined by modifying the quantity the player has of the
@@ -93,9 +97,9 @@ Here are the modifications (actually additions) we have made to the language:
         quantity by the given value
 - `i` declares an item with the given unique name
 - `d` is modified to provide an (optionally multi-line) description of the room
-    room given by the last `r`, or alternatively the item given by the last `i`.
-- `m` defines quantity conditions for the item given by the last `i`
-    - These conditions set the minimum/maximum/initial value on the player's
+    given by the last `r`, or alternatively the item given by the last `i`.
+- `q` defines quantity conditions for the item given by the last `i`
+    - These conditions set the maximum/minimum/initial value on the player's
         inventory for this item with the operator +/-/=, overwriting the default
         values of 1/0/0
 
