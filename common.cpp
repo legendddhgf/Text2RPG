@@ -15,7 +15,7 @@ void stringTrim (char *s, const char *trim, char *ret) {
     }
     // second pass puts the rest of s in ret
     strncpy(ret, s + i, strlen(s + i) + 1); //copy the null character too
-    
+
     // third pass trims back of ret
     for (int i = strlen(ret) - 1; i >= 0; i--) {
         if (strchr(trim, ret[i]) == nullptr) {
