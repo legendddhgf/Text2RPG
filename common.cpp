@@ -24,3 +24,22 @@ void stringTrim (char *s, const char *trim, char *ret) {
     }
   }
 }
+
+// expects a char * that is parameters separated by a combination of atlest one
+// of the characters in delimiters.
+// Will append parameters to the params vector (may append nothing)
+// Note that empty strings will never be appended
+void stringToParams(char *str, vector<string> *params, const char *delimiters) {
+  string temp = string("");
+  for (size_t i = 0; i < strlen(str); i++) {
+    if (strchr(delimiters, str[i]) != nullptr && temp.size() > 0) {
+      params->push_back(temp);
+      temp = string("");
+      continue;
+    } else if (strchr(delimiters, str[i]) != nullptr) continue;
+    temp.append(1, str[i]); // unfortunately unintuitive way of appending chars
+  }
+  if (temp.size() > 0) {
+    params->push_back(temp);
+  }
+}

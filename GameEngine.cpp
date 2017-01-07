@@ -46,11 +46,17 @@ GameEngine::GameEngine (FILE *fp) {
     // everything from
     stringTrim(buf + 1, "\n\r ", modstr);     // the tag to the beginning
     // of the parameter
+    vector<string> params = {};
+    stringToParams(modstr, &params, " ");
     // (room for 'r', description for 'd', etc)
     switch (tag) { // REMEMBER: at this point modstr only contains the
       // parameter, tag contains the current tag
       case 'r': // room
         {
+          if (params.size() != 1) {
+            fprintf(stderr, "line %d: 'r' takes one parameter\n", linecount);
+            exit(1);
+          }
           // TODO: create a function that checks if it is ok to
           // change parsemodes, in other words, checks that the
           // previous thing being modified is ok up to this point
@@ -72,7 +78,7 @@ GameEngine::GameEngine (FILE *fp) {
                 linecount);
             exit(1);
           }
-          lastKey = string(modstr); // key is now the current room
+          lastKey = params.at(0); // key is now the current room
           if (map_room_descriptions.find(lastKey) !=
               map_room_descriptions.end()) {
             fprintf(stderr, "line %d: Can't have duplicate room names\n",
@@ -127,7 +133,7 @@ GameEngine::GameEngine (FILE *fp) {
           // in all cases, append: we know the entry must exist at
           // this point
           map_room_descriptions.at(lastKey).append(string("\t")
-              + string(modstr) + string("\n"));
+              + params.at(0) + string("\n"));
         } else if (parseMode == PARSEMODEITEM) {
           // TODO: PLZ
         }
@@ -156,7 +162,7 @@ GameEngine::GameEngine (FILE *fp) {
               map_room_opts.insert(pair<string, vector<string>>(lastKey, {}));
             }
             // finally, append to the appropriate vector
-            map_room_opts.find(lastKey)->second.push_back(string(modstr));
+            map_room_opts.find(lastKey)->second.push_back(params.at(0));
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
           }
@@ -186,7 +192,7 @@ GameEngine::GameEngine (FILE *fp) {
             if (map_room_tags.find(lastKey) == map_room_tags.end())
               map_room_tags.insert(pair<string, vector<string>>(lastKey, {}));
             // finally, append to the appropriate vector
-            map_room_tags.find(lastKey)->second.push_back(string(modstr));
+            map_room_tags.find(lastKey)->second.push_back(params.at(0));
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
           }
@@ -199,9 +205,13 @@ GameEngine::GameEngine (FILE *fp) {
           exit(1);
         }
         if (parseMode == PARSEMODEROOM) {
+          if (params.size() > 2) {
+            fprintf(stderr, "line %d: in room parsing, 'm' %s",
+                linecount, "takes one or two parameters\n");
+            exit(1);
+          }
           // Cannot have a room be a member of itself
-          // TODO: compare to first parameter only
-          if (string(modstr).compare(lastKey) == 0) {
+          if (params.at(0).compare(lastKey) == 0) {
             fprintf(stderr, "line %d: %s cannot be a member of itself\n",
                 linecount, modstr);
             exit(1);
@@ -211,16 +221,20 @@ GameEngine::GameEngine (FILE *fp) {
             map_room_contents.insert(pair<string,
                 vector<tuple<string, string>>>(lastKey, {}));
           }
-          if (true) { // TODO: if one parameter
+          if (params.size() == 1) {
             map_room_contents.find(lastKey)->second.emplace_back(
-                string(modstr), to_string(PRIORITYDEFAULT));
+                params.at(0), to_string(PRIORITYDEFAULT));
           } else {
-            // TODO: confirm param 2 is an int before inserting
-          } // TODO: check for wrong num of params at beginning of 'm'
+            if (params.at(1).find_first_not_of("1234567890") != string::npos) {
+              fprintf(stderr, "line %d: Priority must be an integer\n",
+                  linecount);
+              exit(1);
+            }
+            map_room_contents.find(lastKey)->second.emplace_back(
+                params.at(0), params.at(1));
+          }
         } else if (parseMode == PARSEMODEITEM) {
           // TODO PLZ
-          // TODO would really help to have a function that makes the
-          //      string into a vector of paramaters
         }
         break;
       case 'e':

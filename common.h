@@ -12,5 +12,6 @@
 using namespace std;
 
 void stringTrim(char *, const char *, char *);
+void stringToParams(char *, vector<string> *, const char *);
 
 #endif
