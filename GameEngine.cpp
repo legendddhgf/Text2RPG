@@ -58,7 +58,7 @@ GameEngine::GameEngine (FILE *fp) {
             exit(1);
           }
           // TODO: create a function that checks if it is ok to
-          // change parsemodes, in other words, checks that the
+          // continue parsing, in other words, checks that the
           // previous thing being modified is ok up to this point
           parseMode = PARSEMODEROOM;
 
@@ -119,32 +119,27 @@ GameEngine::GameEngine (FILE *fp) {
         // functionality of having multiple descriptions is implemented
         // by appending to the previous description string for a given
         // room if it already exists
-        if (parseMode == PARSEMODENONE) {
-          fprintf(stderr, "line %d: Cannot provide descriptions %s",
-              linecount, "if not parsing for anything\n");
-          exit(1);
-        }
         if (parseMode == PARSEMODEROOM) {
-          if (map_room_descriptions.size() == 0) {
-            fprintf(stderr, "line %d: Can't have a description without rooms\n",
-                linecount);
-            exit(1);
-          }
           // in all cases, append: we know the entry must exist at
           // this point
+          // Note: in this case we take the entire group of parameters excluding
+          // the newline and space after the tag as the description
           map_room_descriptions.at(lastKey).append(string("\t")
-              + params.at(0) + string("\n"));
+              + string(modstr) + string("\n"));
         } else if (parseMode == PARSEMODEITEM) {
-          // TODO: PLZ
+          // in all cases, append: we know the entry must exist at
+          // this point
+          // Note: in this case we take the entire group of parameters excluding
+          // the newline and space after the tag as the description
+          map_item_descriptions.at(lastKey).append(string("\t")
+              + string(modstr) + string("\n"));
+        } else {
+          fprintf(stderr, "line %d: Invalid parsemode for 'd'\n", linecount);
+          exit(1);
         }
         break;
       case 'o':
         {
-          if (parseMode == PARSEMODENONE) {
-            fprintf(stderr, "line %d: Cannot provide options %s",
-                linecount, "if not parsing for anything\n");
-            exit(1);
-          }
           if (parseMode == PARSEMODEROOM) {
             if (map_room_opts.find(lastKey) != map_room_opts.end() &&
                 map_room_tags.find(lastKey) != map_room_tags.end() &&
@@ -165,16 +160,14 @@ GameEngine::GameEngine (FILE *fp) {
             map_room_opts.find(lastKey)->second.push_back(params.at(0));
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
+          } else {
+            fprintf(stderr, "line %d: Invalid parsemode for 'o'\n", linecount);
+            exit(1);
           }
           break;
         }
       case 't':
         {
-          if (parseMode == PARSEMODENONE) {
-            fprintf(stderr, "line %d: Cannot provide tags %s",
-                linecount, "if not parsing for anything\n");
-            exit(1);
-          }
           if (parseMode == PARSEMODEROOM) {
             // can't have tags before opts
             if (map_room_opts.find(lastKey) == map_room_opts.end() ||
@@ -195,15 +188,13 @@ GameEngine::GameEngine (FILE *fp) {
             map_room_tags.find(lastKey)->second.push_back(params.at(0));
           } else if (parseMode == PARSEMODEITEM) {
             // TODO: dat functionality
+          } else {
+            fprintf(stderr, "line %d: Invalid parsemode for 't'\n", linecount);
+            exit(1);
           }
           break;
         }
       case 'm':
-        if (parseMode == PARSEMODENONE) {
-          fprintf(stderr, "line %d: 'm' is an invalid tag %s",
-              linecount, "when not parsing for anything\n");
-          exit(1);
-        }
         if (parseMode == PARSEMODEROOM) {
           if (params.size() > 2) {
             fprintf(stderr, "line %d: in room parsing, 'm' %s",
@@ -233,8 +224,9 @@ GameEngine::GameEngine (FILE *fp) {
             map_room_contents.find(lastKey)->second.emplace_back(
                 params.at(0), params.at(1));
           }
-        } else if (parseMode == PARSEMODEITEM) {
-          // TODO PLZ
+        } else {
+          fprintf(stderr, "line %d: Invalid parsemode for 'm'\n", linecount);
+          exit(1);
         }
         break;
       case 'e':
@@ -244,12 +236,36 @@ GameEngine::GameEngine (FILE *fp) {
         // TODO
         break;
       case 'i':
-        // TODO: items PLZ
-        // TODO: create a function that checks if it is ok to
-        // change parsemodes, in other words, checks that the
-        // previous thing being modified is ok up to this point
-        parseMode = PARSEMODEITEM;
-        break;
+        {
+          // TODO: create a function that checks if it is ok to
+          // continue parsing, in other words, checks that the
+          // previous thing being modified is ok up to this point
+          parseMode = PARSEMODEITEM;
+          if (params.size() != 1) {
+            fprintf(stderr, "line %d: 'i' takes one parameter\n", linecount);
+            exit(1);
+          }
+          lastKey = params.at(0); // key is now the current item
+          if (map_item_descriptions.find(lastKey) !=
+              map_item_descriptions.end()) {
+            fprintf(stderr, "line %d: Can't have duplicate item names\n",
+                linecount);
+            exit(1);
+          }
+          map_item_descriptions.insert(pair<string, // new entry
+              string>(lastKey, string("")));
+          break;
+        }
+      case 'q':
+        {
+          if (parseMode == PARSEMODEITEM) {
+            // TODO
+          } else {
+            fprintf(stderr, "line %d: Invalid parsemode for 'q'\n", linecount);
+            exit(1);
+          }
+          break;
+        }
       case '#': // support those comments
         // Yes, this works.
         break;
@@ -302,8 +318,16 @@ exit(1); }
     }
   }
   fprintf(stdout, "=====\nITEMS:\n=====\n");
-  while(false) { // this is where you would print out items
-
+  auto iter_items = map_item_descriptions.begin();
+  int count_items = 1;
+  // print item info
+  while(iter_items != map_item_descriptions.end()) {
+    string item = iter_items->first;
+    string description = iter_items->second;
+    iter_items++;
+    fprintf(stdout, "%d: %s\n", count_items++, item.c_str());
+    // assumes description was modified in a certain way first
+    fprintf(stdout, "%s", description.c_str());
   }
   fprintf(stdout, "=====\n");
   free(buf);

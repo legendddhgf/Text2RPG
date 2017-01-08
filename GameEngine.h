@@ -18,6 +18,10 @@ typedef struct GameEngine {
   // tags to compensate: must alternate)
   unordered_map <string, vector <string>> map_room_opts;
   unordered_map <string, vector <string>> map_room_tags;
+  // key is item name, value is description
+  unordered_map <string, string> map_item_descriptions;
+  // "", tuples are (min, max, curval), NOTE: curval is modified during runtime
+  unordered_map <string, tuple<string, string, string>> map_item_quantifiers;
 
   GameEngine(FILE *);
 
