@@ -42,6 +42,22 @@ Below is the specification of the game file language, in a regular language like
         (q ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )*
         (d $ITEM_DESC)+
     )
+|   (   # Character declaration
+        c $CHAR_NAME
+        (d $CHAR_DESC)+
+        (   # Item declaration
+            i $ITEM_NAME
+            (q ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+ )*
+            (d $ITEM_DESC)+
+
+            # Power  declaration
+            p $POWER_NAME
+            (d $POWER_DESC)+
+            (
+              (e $ROOM_NAME (( = ) $(PRIORITY)))
+            )
+        )
+    )
 )*
 ```
 
@@ -73,9 +89,20 @@ Here are the modifications (actually additions) we have made to the language:
 - `q` defines quantity conditions for the item given by the last `i`
     - These conditions set the maximum/minimum/initial value on the player's inventory for this item with the operator +/-/=, overwriting the default values of 1/0/0
 
+- `c` declares a character  with the given unique name
+- `d` is modified to provide an (optionally multi-line) description of the
+- character  given by the last `c`, or alternatively the item given by the last `i`, or the power given by the last `p`
+- `q` defines quantity conditions for the item given by the last `i`
+    - these conditions set the maximum/minimum/initial value on the player's inventory for this item with the operator +/-/=, overwriting the default values of 1/0/0
+- `p` declares a power with the given unique name
+- `e` defines an entry condition that must be satisfied in order to enter the room given by the last `r`, or take the transition given by the last `o` if it appears before the `t` of that transition, with a given priority
+    - This condition bypasses the initial condition set inside `r`,  resolving to `TRUE` if the player has equal the given name of the `r`
+    - If an entry condition is not satisfied, the initial condition set inside `r` applies.
+
 ## Credits:
 - Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
 - August Valera (@4U6U57) - Developer
+- Thuan Le (@thuanle123) - Developer
 
 ### OTHERS
 - Nathan Whitehead (@nwhitehead) - Designed class assignment for UCSC's CMPS 12B that inspired this project
