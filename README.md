@@ -58,6 +58,27 @@ Below is the specification of the game file language, in a regular language like
             )
         )
     )
+|   (   # NPC declaration
+        npc #NPC_NAME
+        (d #NPC_DESC)+
+        (   # Quest declaration
+            Q #QUEST_NAME
+            (d $QUEST_DESC)+
+            (   # Requirement condition
+                (a $ITEM_NAME (+ | - | =) $VALUE)
+                (a $ENEMY_NAME (+ | - | =) $VALUE)
+                (e $ITEM_NAME ((> | >= | =) $VALUE)?)
+                (e $ENEMY_NAME ((> | >= | =)$VALUE)?)
+
+            |   # Reward declaration
+                i $ITEM_NAME
+                (q ((+ $MAX_QTY) | (- $MIN_QTY) | (= $INIT_QTY))+)
+                (d $ITEM_DESC)
+                mv $ITEM_NAME $CHAR_NAME
+            )
+        mv $NPC_NAME $ROOM_NAME
+
+    )
 )*
 ```
 
@@ -98,6 +119,15 @@ Here are the modifications (actually additions) we have made to the language:
 - `e` defines an entry condition that must be satisfied in order to enter the room given by the last `r`, or take the transition given by the last `o` if it appears before the `t` of that transition, with a given priority
     - This condition bypasses the initial condition set inside `r`,  resolving to `TRUE` if the player has equal the given name of the `r`
     - If an entry condition is not satisfied, the initial condition set inside `r` applies.
+
+- `npc` declares a NPC with the given unique name
+- `Q` declares a quest with the given unique name
+- `d` provides an (optionally multi-line) description of the NPC given by the last `npc`, or alternatively the quest given by the last `Q`
+- `a` defines an action to be performed upon receveing the quest specific by the last `Q`
+- `e` defines an entry condition that must be satisfied in order to complete the quest `Q`
+    - Multiple `e` tags defined for the same entity are logcally `&&`'ed (must all be met)
+    - This condition is defined by the quantity of the given item the player has,or the quantity of the monster the player kills, resvoling to `TRUE` if the play has equal/greater than or equal the given value of the item with the operator >=/=
+- `mv` moves the NPC to the room `r`, alternatively moves the item to the character upon completion of a quest `Q`
 
 ## Credits:
 - Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
