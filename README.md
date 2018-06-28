@@ -71,7 +71,8 @@ Below is the specification of the game file language, in a regular language like
                 (a $ITEM_NAME (+ | - | =) $VALUE)
                 (a $ENEMY_NAME (+ | - | =) $VALUE)
                 (e $ITEM_NAME ((> | >= | =) $VALUE)?)
-                (e $ENEMY_NAME ((> | >= | =)$VALUE)?)
+                (e $ENEMY_NAME ((> | >= | =) $VALUE)?)
+                (a $NPC_NAME ((> | >= | =) $VALUE)?)
 
             |   # Reward declaration
                 I $INVENTORY
@@ -80,6 +81,7 @@ Below is the specification of the game file language, in a regular language like
                   ((q ((+ $MAX_QTY | (- $MIN_QTY) | (= $INIT_QTY))+))*)
                 )
             )
+        )
     )
 )*
 ```
