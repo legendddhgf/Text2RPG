@@ -53,7 +53,7 @@ Below is the specification of the game file language, in a regular language like
               M $MAX_INV
             )
 
-            # Power  declaration
+            # Power declaration
             p $POWER_NAME
             (d $POWER_DESC)+
             (
@@ -63,15 +63,15 @@ Below is the specification of the game file language, in a regular language like
     )
 |   (   # NPC declaration
         n $NPC_NAME
-        (d #NPC_DESC)+
+        (d $NPC_DESC)+
         (   # Quest declaration
-            Q #QUEST_NAME
+            Q $QUEST_NAME
             (d $QUEST_DESC)+
             (   # Requirement condition
                 (a $ITEM_NAME (+ | - | =) $VALUE)
-                (a $ENEMY_NAME (+ | - | =) $VALUE)
+                (a $MONSTER_NAME (+ | - | =) $VALUE)
                 (e $ITEM_NAME ((> | >= | =) $VALUE)?)
-                (e $ENEMY_NAME ((> | >= | =) $VALUE)?)
+                (e $MONSTER__NAME ((> | >= | =) $VALUE)?)
                 (a $NPC_NAME ((> | >= | =) $VALUE)?)
 
             |   # Reward declaration
@@ -82,6 +82,35 @@ Below is the specification of the game file language, in a regular language like
                 )
             )
         )
+    )
+|   (   # Monster declaration
+        M $MONSTER_NAME
+        (d $MONSTER_DEC)
+        (   # Monster Drop
+            A $ITEM_NAME
+
+            #  Monster element
+            A $ELEMENT_NAME
+
+            # Power declaration
+            p $POWER_NAME
+            (d $POWER_DESC)+
+            (
+              // Can't figure out how to give monster ability to be immune,
+              repel or absorb to
+              ELEMENT_NAME
+            )
+        )
+    )
+|   (   # Element declaration
+        E $ELEMENT_NAME
+        Note: Here is what I want but i can't express it in expression
+        E $FIRE
+        (w $FIRE < $ELEMENT_NAME $ELEMENT_NAME)
+        (s $FIRE > $ELEMENT_NAME $ELEMENT_NAME)
+        w means fire is weak to such and such element
+        s means fire is strong against such and such element
+        everything else not mention will be neutral against fire
     )
 )*
 ```
