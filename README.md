@@ -164,6 +164,7 @@ Here are the modifications (actually additions) we have made to the language:
 - `e` defines an entry condition that must be satisfied in order to complete the quest `Q`
     - Multiple `e` tags defined for the same entity are logcally `&&`'ed (must all be met)
     - This condition is defined by the quantity of the given item the player has,or the quantity of the monster the player kills, resvoling to `TRUE` if the play has equal/greater than or equal the given value of the item with the operator >=/=
+    - Testing station
 
 ## Credits:
 - Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
