@@ -111,6 +111,7 @@ Below is the specification of the game file language, in a regular language like
         w means fire is weak to such and such element
         s means fire is strong against such and such element
         everything else not mention will be neutral against fire
+        -TESTING
     )
 )*
 ```
