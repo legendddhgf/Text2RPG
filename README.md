@@ -81,9 +81,12 @@ Below is the specification of the game file language, in a regular language like
                   ((q ((+ $MAX_QTY | (- $MIN_QTY) | (= $INIT_QTY))+))*)
                 )
             )
+
+
         )
     )
 |   (   # Monster declaration
+        # TODO, merge this with NPC
         M $MONSTER_NAME
         (d $MONSTER_DEC)
         (   # Monster Drop
@@ -103,6 +106,7 @@ Below is the specification of the game file language, in a regular language like
         )
     )
 |   (   # Element declaration
+        # TODO
         E $ELEMENT_NAME
         Note: Here is what I want but i can't express it in expression
         E $FIRE
@@ -137,16 +141,9 @@ Here are the modifications (actually additions) we have made to the language:
     - This condition is defined by the quantity of the given item the player has, resolving to `TRUE` if the player has less than/less than or equal/greater than/greater than or equal/exactly equal the given value of the item with the operator >/>=/</<=/=
     - If an entry condition is given with an item argument but no operator and  value, the comparison defaults to `> $ITEM_MIN` (checks if the player has  any amount of the item greater than the minimum amount).
 - `a` defines an action to be performed upon entering the room specified by the last `r`, or upon taking the transition given by the last `o` if it appears before the `t` of that transition
-
     - This action is defined by modifying the quantity the player has of the given item, specifically incrementing/decrementing/setting the player's quantity by the given value
-- `i` declares an item with the given unique name
-- `d` is modified to provide an (optionally multi-line) description of the room given by the last `r`, or alternatively the item given by the last `i`.
 - `q` defines quantity conditions for the item given by the last `i`
     - These conditions set the maximum/minimum/initial value on the player's inventory for this item with the operator +/-/=, overwriting the default values of 1/0/0
-
-- `c` declares a character  with the given unique name
-- `d` is modified to provide an (optionally multi-line) description of the
-- character  given by the last `c`, or alternatively the item given by the last `i`, or the power given by the last `p`
 - `I` defines an inventory for that character
 - `A` adds items into the inventory
 - `q` defines quantity conditions for the item by the last `A`
@@ -156,15 +153,33 @@ Here are the modifications (actually additions) we have made to the language:
 - `e` defines an entry condition that must be satisfied in order to enter the room given by the last `r`, or take the transition given by the last `o` if it appears before the `t` of that transition, with a given priority
     - This condition bypasses the initial condition set inside `r`,  resolving to `TRUE` if the player has equal the given name of the `r`
     - If an entry condition is not satisfied, the initial condition set inside `r` applies.
-
-- `n` declares a NPC with the given unique name
-- `Q` declares a quest with the given unique name
-- `d` provides an (optionally multi-line) description of the NPC given by the last `n`, or alternatively the quest given by the last `Q`
 - `a` defines an action to be performed upon receveing the quest specific by the last `Q`
 - `e` defines an entry condition that must be satisfied in order to complete the quest `Q`
     - Multiple `e` tags defined for the same entity are logcally `&&`'ed (must all be met)
     - This condition is defined by the quantity of the given item the player has,or the quantity of the monster the player kills, resvoling to `TRUE` if the play has equal/greater than or equal the given value of the item with the operator >=/=
     - Testing station
+
+Unique Declaration:
+- `E` declares an element with the given unique name
+- `Q` declares a quest with the given unique name
+- `c` declares a character with the given unique name
+- `i` declares an item with the given unique name
+- `n` declares a NPC with the given unique name
+    - NPC can also be a monster or a boss
+- `p` declares a power with the given unique name
+- `r` declares a room with a given unique name
+
+Description:
+- `d` provides an optionally multi-line description of an object.
+    - it describes the object given by the last `E`,`Q`, `c`, `i`, `n`, `p`, `r`
+
+TODO:
+Merge Monsters with NPC
+Figure out Element
+Maybe merge Element as a skill
+Less cluster?
+Categorize them together
+Figure out Health/Damage
 
 ## Credits:
 - Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
