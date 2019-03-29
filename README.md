@@ -54,7 +54,7 @@ Below is the specification of the game file language, in a regular language like
             )
 
             # Power declaration
-            p $POWER_NAME
+            p $POWER_REGEX
             (d $POWER_DESC)+
             (
               (e $ROOM_NAME (( = ) $(PRIORITY)))
@@ -72,7 +72,7 @@ Below is the specification of the game file language, in a regular language like
                 (a $ITEM_NAME (+ | - | =) $VALUE)
                 (a $MONSTER_NAME (+ | - | =) $VALUE)
                 (e $ITEM_NAME ((> | >= | =) $VALUE)?)
-                (e $MONSTER__NAME ((> | >= | =) $VALUE)?)
+                (e $MONSTER_NAME ((> | >= | =) $VALUE)?)
                 (a $NPC_NAME ((> | >= | =) $VALUE)?)
 
             |   # Reward declaration
@@ -82,40 +82,27 @@ Below is the specification of the game file language, in a regular language like
                   ((q ((+ $MAX_QTY | (- $MIN_QTY) | (= $INIT_QTY))+))*)
                 )
             )
-        )
-    )
-|   (   # Monster declaration
-        # TODO, merge this with NPC
-        M $MONSTER_NAME
-        (d $MONSTER_DEC)
-        (   # Monster Drop
-            A $ITEM_NAME
-
-            #  Monster element
-            A $ELEMENT_NAME
-
-            # Power declaration
             p $POWER_NAME
             (d $POWER_DESC)+
             (
-              // Can't figure out how to give monster ability to be immune,
-              repel or absorb to
-              ELEMENT_NAME
+              (e $ROOM_NAME (( = ) $(PRIORITY)))
+
             )
         )
     )
-|   (   # Element declaration
-        # TODO
-        E $ELEMENT_NAME
-        Note: Here is what I want but i can't express it in expression
-        E $FIRE
-        (w $FIRE < $ELEMENT_NAME $ELEMENT_NAME)
-        (s $FIRE > $ELEMENT_NAME $ELEMENT_NAME)
-        w means fire is weak to such and such element
-        s means fire is strong against such and such element
-        everything else not mention will be neutral against fire
-        -TESTING
+|
+|   (   # Power  declaration
+        p $POWER_NAME
+        (d $POWER_DESC)+
+        (
+          # Condition
+          (E $POWER_NAME ( > ) $POWER_NAME)
+          (I $POWER_NAME ( < ) $POWER_NAME)
+          (N $POWER_NAME ( = ) $POWER_NAME)
+        )
+
     )
+|
 )*
 ```
 
@@ -141,12 +128,11 @@ Here are the modifications (actually additions) we have made to the language:
 
 Place Holder - Delete later
 Alphabet Used
-Capital: E, Q
+Capital: E, I, N, Q
 Normal : a,c,d,e i, n, o, p, r, t
 
 
 Unique Declarations:
-- `E` declares an element with the given unique name
 - `Q` declares a quest with the given unique name
 - `c` declares a character with the given unique name
 - `i` declares an item with the given unique name
@@ -160,6 +146,10 @@ Description:
     - it describes the object given by the last `E`,`Q`, `c`, `i`, `n`, `p`, `r`
 
 Conditions:
+- `E` defines a power that is effective against another defined power
+- `I` defines a power that is ineffective against another defined power
+- `N` defines a power that is neutral against other defined power
+    - if neither `E` or `I` is defined, then it is the default value
 - `a` defines an action to be performed upon entering the room specified by the last `r`, or upon taking the transition given by the last `o` if it appears before the `t` of that transition
     - This action is defined by modifying the quantity the player has of the given item, specifically incrementing/decrementing/setting the player's quantity by the given value
     - defines an action to be performed upon receiving the quest specific given by the last `Q`
@@ -177,8 +167,6 @@ Conditions:
 
 TODO:
 Merge Monsters with NPC
-Figure out Element
-Maybe merge Element as a skill
 Less cluster?
 Categorize them together
 Figure out Health/Damage
