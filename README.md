@@ -170,6 +170,7 @@ Merge Monsters with NPC
 Less cluster?
 Categorize them together
 Figure out Health/Damage
+testing on new computer
 
 ## Credits:
 - Isaak Cherdak (@legendddhgf) - Lead Developer and Product Owner
